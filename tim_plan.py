@@ -5,7 +5,7 @@ import astropy.units as u
 from astropy.visualization import time_support, quantity_support
 import numpy as np
 
-from libballoonplanner import (get_observer, observability, time_vs_altitude,
+from balloonplanner.libballoonplanner import (get_observer, observability, time_vs_altitude,
                                time_vs_sun_relative_az, save_config)
 
 time_support()

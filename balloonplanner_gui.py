@@ -9,14 +9,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
-from tkinter import *
+from tkinter import (Tk, DoubleVar, BooleanVar, StringVar, N, E, S, W)
 from tkinter import font
 from tkinter import ttk
 
-from libballoonplanner import (get_observer, observability, time_vs_altitude,
+from balloonplanner.libballoonplanner import (get_observer, observability, time_vs_altitude,
                                time_vs_airmass, time_vs_sun_relative_az,
                                ground_track, load_config)
-from libballoonplanner import (EL_MIN_DEFAULT, EL_MAX_DEFAULT, DAZ_MIN_DEFAULT,
+from balloonplanner.libballoonplanner import (EL_MIN_DEFAULT, EL_MAX_DEFAULT, DAZ_MIN_DEFAULT,
                                DAZ_MAX_DEFAULT, LOC_DEFAULT, ALT_DEFAULT)
 
 

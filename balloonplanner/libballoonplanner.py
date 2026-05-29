@@ -9,7 +9,7 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 
-from astroplan_like import my_observability_table
+from .astroplan_like import my_observability_table
 
 time_support()
 quantity_support()
