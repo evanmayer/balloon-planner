@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "balloon-planner"
+description = "Scientific ballooning mission planning package"
+readme = "README.md"
+version = "0.1.0"
+dependencies = [
+    "astroplan",
+    "astropy",
+    "matplotlib",
+    "numpy"
+]
+requires-python = ">=3.11"
+
+authors = [
+    {name = "Evan Mayer", email="contactevanmayer@gmail.com"},
+]
+
+license = "MIT"
+license-files = ["LICENSE",]
+
+keywords = ["astronomy", "scientific ballooning", "mission planning"]
+
+[project.urls]
+repository = "https://github.com/evanmayer/balloon-planner/"
+MyHomepage = "https://evanmayer.github.io"
