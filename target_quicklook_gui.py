@@ -150,6 +150,10 @@ if __name__ == '__main__':
 
     # Build GUI
     root = Tk()
+
+    style = ttk.Style(root)
+    style.theme_use('classic')
+
     default_font = font.nametofont("TkDefaultFont")
     bold_font = font.nametofont("TkDefaultFont").copy()
     default_font.configure(size=16)
