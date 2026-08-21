@@ -47,6 +47,7 @@ def dispatch_analysis():
         stationary=stationaryFlag.get()
     )
 
+    is_solar_system = False
     if 'name' in my_resolver:
         my_label = tgt_name.get()
         is_solar_system = False
@@ -59,17 +60,25 @@ def dispatch_analysis():
             coord = SkyCoord(ra=foo.ra, dec=foo.dec, obstime=times,
                        location=my_observer.location)
             is_solar_system = True
+        except Exception as e:
+            raise(e)
     else:
         my_label = tgt_label.get()
         ra_str, dec_str = tgt_radec.get().split(', ')
         # If not sexagesimal, assume decimal degrees. Let Angle and SkyCoord 
         # handle input sanitizing
+        ra_unit = 'deg'
         if ':' not in ra_str:
             ra_str += 'd'
+        else:
+            ra_unit = 'hr'
+        dec_unit = 'deg'
         if ':' not in dec_str:
             dec_str += 'd'
-        ra = Angle(ra_str)
-        dec = Angle(dec_str)
+        else:
+            dec_unit = 'deg'
+        ra = Angle(ra_str, unit=ra_unit)
+        dec = Angle(dec_str, unit=dec_unit)
         coord = SkyCoord(ra, dec, obstime=times, location=my_observer.location)
     coord.name = my_label
     # print(f'{coord.name}: {coord}')
@@ -130,6 +139,8 @@ def dispatch_analysis():
         _, _ = ground_track(my_observer, times)
     else:
         pass
+
+    plt.show()
 
 
 def cleanup():

@@ -3,6 +3,7 @@ from astropy.coordinates import SkyCoord, EarthLocation, get_body
 from astropy.time import Time
 import astropy.units as u
 from astropy.visualization import time_support, quantity_support
+import matplotlib.pyplot as plt
 import numpy as np
 
 from balloonplanner.libballoonplanner import (get_observer, observability, time_vs_altitude,
@@ -38,7 +39,7 @@ if __name__ == '__main__':
     launch_time = Time('2027-12-25 00:00:00', scale='utc', location=launch_location)
 
     step_hr = 1.0 * u.hr
-    my_duration = 1 * 24 * u.hr
+    my_duration = 3 * 7 * 24 * u.hr
     timespan = np.arange(0, my_duration.value + step_hr.value, step_hr.value) * u.hr
     times = launch_time + timespan
 
@@ -63,7 +64,9 @@ if __name__ == '__main__':
         ),
         name='GOODS-S'
     )
-    targets += [goods_s,]
+    # euclid deep field south
+    edfs = FixedTarget(SkyCoord(ra='04h04m57.84s', dec='-48d25m22.8s', obstime=times, location=tim.location), name='EDFS')
+    targets += [goods_s, edfs]
 
     table = observability(
         targets,
@@ -83,9 +86,42 @@ if __name__ == '__main__':
     fig, ax = time_vs_sun_relative_az(targets, tim, times, daz_min=DAZ_MIN, daz_max=DAZ_MAX)
     ax.set_title('Sun-Relative Azimuth Angle Limits')
 
+    plt.show()
+
+    # Per-target observable fraction as a function of latitude
+    lat_offsets = np.arange(0, 10, 2) * u.deg
+    for lat_offset in lat_offsets:
+        launch_location = EarthLocation(lat=LDB[0]+lat_offset, lon=LDB[1], height=FLOAT_ALT)
+        launch_time = Time('2027-12-25 00:00:00', scale='utc', location=launch_location)
+
+        tim = get_observer(
+            launch_location.lat,
+            launch_location.lon,
+            launch_location.height,
+            times,
+            stationary=False,
+            name='TIM'
+        )
+        table = observability(
+            targets,
+            tim,
+            times,
+            el_min=EL_MIN,
+            el_max=EL_MAX,
+            daz_min=DAZ_MIN,
+            daz_max=DAZ_MAX,
+            plot=False
+        )
+        print('lat:', LDB[0] + lat_offset)
+        print(table)
+        fig, ax = time_vs_altitude(targets, tim, times, el_min=EL_MIN, el_max=EL_MAX)
+        ax.set_title(f'Elevation Axis Limits: lat:{LDB[0]+lat_offset:.2f}')
+    print(lat_offsets + LDB[0])
+
+    plt.show()
 
     # Planets
-    target_names = ['mars', 'jupiter', 'saturn', 'uranus', 'neptune']
+    target_names = ['mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'moon']
     targets = []
     for name in target_names:
         foo = get_body(name, times, location=tim.location)
@@ -115,3 +151,5 @@ if __name__ == '__main__':
 
     fig, ax = time_vs_sun_relative_az(targets, tim, times, daz_min=DAZ_MIN, daz_max=DAZ_MAX)
     ax.set_title('Sun-Relative Azimuth Angle Limits')
+
+    plt.show()

@@ -1,5 +1,6 @@
 from astroplan import Observer, Constraint, AltitudeConstraint
 from astroplan.plots import plot_altitude, plot_airmass
+from astroplan.scheduling import Scheduler, Scorer
 
 from astropy.coordinates import SkyCoord, get_body
 import astropy.units as u
@@ -152,8 +153,8 @@ def get_observer(
         )
     else:
         observer = Observer(
-            longitude=launch_lon*np.ones_like(t.value),
-            latitude=launch_lat*np.ones_like(t.value),
+            longitude=launch_lon,#*np.ones_like(t.value),
+            latitude=launch_lat,#*np.ones_like(t.value),
             elevation=float_alt,
             name=name
         )
@@ -169,6 +170,7 @@ def observability(
         el_max=EL_MAX_DEFAULT,
         daz_min=DAZ_MIN_DEFAULT,
         daz_max=DAZ_MAX_DEFAULT,
+        additional_constraints=[],
         grid_times_targets=True,
         plot=True
     ):
@@ -176,7 +178,8 @@ def observability(
     constraints = [
         AltitudeConstraint(el_min, el_max),
         SunRelativeAzConstraint(min=daz_min, max=daz_max)
-    ]
+    ] + additional_constraints
+
     table = my_observability_table(constraints, observer, targets, times, grid_times_targets=grid_times_targets)
 
     if plot:
@@ -238,7 +241,6 @@ def time_vs_altitude(
     ax.legend()
     ax.grid(True)
     fig.tight_layout()
-    plt.show()
 
     return fig, ax
 
@@ -253,7 +255,6 @@ def time_vs_airmass(
     ax.legend()
     ax.grid(True)
     fig.tight_layout()
-    plt.show()
 
     return fig, ax
 
@@ -289,7 +290,6 @@ def time_vs_sun_relative_az(
     ax.grid(True)
     ax.legend()
     fig.tight_layout()
-    plt.show()
 
     return fig, ax
 
@@ -317,7 +317,6 @@ def ground_track(
     fig.tight_layout()
     ax.set_facecolor('lightgrey')
     fig.set_facecolor('lightgrey')
-    plt.show()
 
     return fig, ax
 
@@ -336,3 +335,28 @@ def load_config(filename):
 def save_config(filename, param_dict):
     with open(filename, 'w') as f:
         json.dump(param_dict, f)
+
+
+class CategoricalAlternateScheduler(Scheduler):
+    '''
+    Schedule logical blocks of observing time, allowing the scheduler to pick
+    from a prioritized, finite-numbered queue of targets in each logical block.
+
+    Underlying data structure is a dict of lists.
+    '''
+    def __init__(self, *args, **kwargs):
+        super(CategoricalAlternateScheduler, self).__init__(*args, **kwargs)
+
+    def _make_schedule(self, block_dict):
+        # gather all the constraints on each block into a single attribute
+        for category, blocks in block_dict.items():
+            for b in blocks:
+                # have each block adhere to the constraints of the scheduler
+                if b.constraints is None:
+                    b._all_constraints = self.constraints
+                else:
+                    b._all_constraints = self.constraints + b.constraints
+                # Here, the SimpleScheduler enforces at least an
+                # AltitudeConstraint = 0. We omit this.
+                b.observer = self.observer
+            # before we can schedule, we need to know where blocks meet the constraints
