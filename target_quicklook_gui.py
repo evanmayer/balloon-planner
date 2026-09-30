@@ -13,9 +13,11 @@ from tkinter import (Tk, DoubleVar, BooleanVar, StringVar, N, E, S, W)
 from tkinter import font
 from tkinter import ttk
 
-from balloonplanner.libballoonplanner import (get_observer, observability, time_vs_altitude,
-                               time_vs_airmass, time_vs_sun_relative_az,
-                               ground_track, load_config)
+from balloonplanner.libballoonplanner import (get_observer, observability,
+                                              time_vs_altitude, time_vs_airmass,
+                                              time_vs_sun_relative_az,
+                                              time_vs_sun_relative_el,
+                                              ground_track, load_config)
 from balloonplanner.libballoonplanner import (EL_MIN_DEFAULT, EL_MAX_DEFAULT, DAZ_MIN_DEFAULT,
                                DAZ_MAX_DEFAULT, LOC_DEFAULT, ALT_DEFAULT)
 
@@ -134,6 +136,14 @@ def dispatch_analysis():
             times,
             daz_min=daz_min,
             daz_max=daz_max
+        )
+    elif 'time_vs_sun_relative_el' in my_method:
+        _, _ = time_vs_sun_relative_el(
+            targets,
+            my_observer,
+            times,
+            el_min=el_min,
+            el_max=el_max
         )
     elif 'ground_track' in my_method:
         _, _ = ground_track(my_observer, times)
@@ -256,7 +266,7 @@ if __name__ == '__main__':
     method = ttk.Combobox(mainframe, textvariable=method_var)
     method.state(['readonly'])
     method.grid(stick=(W, E), column=1, row=8)
-    method['values'] = ('constraints', 'time_vs_altitude', 'time_vs_airmass', 'time_vs_sun_relative_az', 'ground_track')
+    method['values'] = ('constraints', 'time_vs_altitude', 'time_vs_airmass', 'time_vs_sun_relative_az', 'time_vs_sun_relative_el', 'ground_track')
     root.option_add("*TCombobox*Listbox*Font", default_font)
 
     style = ttk.Style()

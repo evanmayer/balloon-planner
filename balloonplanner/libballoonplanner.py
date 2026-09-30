@@ -286,7 +286,40 @@ def time_vs_sun_relative_az(
     ax.axhline(daz_min, color='limegreen')
     ax.axhline(daz_max, color='limegreen')
     ax.axhspan(daz_min, daz_max, color='limegreen', alpha=0.3)
-    ax.set_ylabel('Sun-Relative Azimuth\n$AZ_{sun} - AZ_{tgt}$ (deg)\n+clockwise from local North')
+    ax.set_ylabel('Sun-Relative Azimuth\n$AZ_{tgt} - AZ_{sun}$ (deg)\n+clockwise from local North')
+    ax.grid(True)
+    ax.legend()
+    fig.tight_layout()
+
+    return fig, ax
+
+
+def time_vs_sun_relative_el(
+        targets:list,
+        observer:Observer,
+        times,
+        el_min=EL_MIN_DEFAULT,
+        el_max=EL_MAX_DEFAULT,
+    ):
+    '''
+    Plot the sun-relative elevation of the observer when observing the target.
+    This is a delta elevation, target el - sun el. Positive angles denote the
+    observer is pointed to a greater elevation angle than the sun.
+    '''
+    fig, ax = plt.subplots(figsize=(12,4))
+    for target in targets:
+        ax.plot(
+            times,
+            (
+                observer.altaz(times, target=target).alt.deg -
+                observer.sun_altaz(times).alt.deg
+            ),
+            marker='.',
+            label=target.name
+        )
+    # If there were limits for "good" sun-relative elevation, you'd plot a green
+    # region here.
+    ax.set_ylabel('Sun-Relative Elevation\n$EL_{tgt} - EL_{sun}$ (deg)')
     ax.grid(True)
     ax.legend()
     fig.tight_layout()
